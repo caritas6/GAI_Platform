@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useAuth, UserRole } from '@/lib/auth-context';
 
 const ROLES: { value: UserRole; icon: string; label: string; desc: string }[] = [
@@ -22,6 +24,8 @@ export default function LoginPage() {
   const [role,        setRole]        = useState<UserRole>('student');
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState('');
+  const [resetSent,   setResetSent]   = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleSubmit = async () => {
     setError('');
@@ -59,6 +63,30 @@ export default function LoginPage() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Google 로그인 오류');
       setLoading(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!email.trim()) {
+      setError('비밀번호를 재설정할 이메일을 입력해주세요.');
+      return;
+    }
+    if (!auth) { setError('Firebase가 초기화되지 않았습니다.'); return; }
+    setError('');
+    setResetSent(false);
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setResetSent(true);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg.includes('user-not-found') || msg.includes('invalid-email')) {
+        setError('등록된 이메일이 없거나 형식이 올바르지 않습니다.');
+      } else {
+        setError('재설정 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -101,7 +129,7 @@ export default function LoginPage() {
             {(['login', 'register'] as const).map(t => (
               <button
                 key={t}
-                onClick={() => { setTab(t); setError(''); }}
+                onClick={() => { setTab(t); setError(''); setResetSent(false); }}
                 style={{
                   flex: 1, padding: '8px 0', fontSize: 13, fontWeight: 500,
                   border: 'none', background: 'none', cursor: 'pointer',
@@ -207,6 +235,35 @@ export default function LoginPage() {
               tab === 'login' ? '로그인' : '회원가입'
             )}
           </button>
+
+          {/* 비밀번호 찾기 (로그인 탭에서만 표시) */}
+          {tab === 'login' && (
+            <div style={{ textAlign: 'center', marginBottom: 4 }}>
+              {resetSent ? (
+                <div style={{
+                  fontSize: 11, color: '#1A7A4A', background: '#E8F7EF',
+                  border: '0.5px solid #A8DFC0', borderRadius: 7,
+                  padding: '8px 12px', marginBottom: 8,
+                }}>
+                  ✉️ 비밀번호 재설정 메일을 보냈어요. 받은 편지함을 확인해주세요.
+                </div>
+              ) : (
+                <button
+                  onClick={handleReset}
+                  disabled={resetLoading}
+                  style={{
+                    background: 'none', border: 'none', cursor: resetLoading ? 'default' : 'pointer',
+                    fontSize: 11, color: 'var(--color-text-tertiary)',
+                    textDecoration: 'underline', textDecorationStyle: 'dotted',
+                    padding: '2px 0', marginBottom: 6,
+                    opacity: resetLoading ? 0.5 : 1,
+                  }}
+                >
+                  {resetLoading ? '메일 발송 중...' : '비밀번호를 잊으셨나요?'}
+                </button>
+              )}
+            </div>
+          )}
 
           {/* 구분선 */}
           <div style={{
