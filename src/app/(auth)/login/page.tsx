@@ -1,10 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth, UserRole } from '@/lib/auth-context';
+
+/** 인앱 브라우저 감지 (카카오톡, 인스타그램, 네이버앱 등) */
+function detectInAppBrowser(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return (
+    /KAKAOTALK/i.test(ua) ||
+    /Instagram/i.test(ua) ||
+    /NAVER/i.test(ua) ||
+    /Line\//i.test(ua) ||
+    /FBAV|FB\/|FBAN/i.test(ua) ||
+    /Twitter/i.test(ua) ||
+    /MicroMessenger/i.test(ua) ||          // WeChat
+    (/Android/i.test(ua) && /wv\b/i.test(ua) && !/Chrome\//i.test(ua)) // Android WebView
+  );
+}
 
 const ROLES: { value: UserRole; icon: string; label: string; desc: string }[] = [
   { value: 'student',    icon: '🎓', label: '학생',         desc: 'KBU 디자인학과 재학생' },
@@ -26,6 +42,11 @@ export default function LoginPage() {
   const [error,       setError]       = useState('');
   const [resetSent,   setResetSent]   = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+
+  useEffect(() => {
+    setInAppBrowser(detectInAppBrowser());
+  }, []);
 
   const handleSubmit = async () => {
     setError('');
@@ -276,26 +297,69 @@ export default function LoginPage() {
           </div>
 
           {/* Google 로그인 */}
-          <button
-            onClick={handleGoogle}
-            disabled={loading}
-            style={{
-              width: '100%', padding: '9px', border: '0.5px solid var(--color-border)',
-              borderRadius: 9, background: 'var(--color-bg-primary)',
-              cursor: loading ? 'not-allowed' : 'pointer', fontSize: 13,
-              color: 'var(--color-text-secondary)', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', gap: 8,
-              transition: 'background .15s',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 2.9l6-6C34.5 3.1 29.6 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.4 13.7 17.7 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.2 5.2-4.7 6.8l7.3 5.7c4.3-4 6.7-9.8 6.7-16.5z"/>
-              <path fill="#FBBC05" d="M10.7 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7-5.4A23 23 0 0 0 1 24c0 3.7.9 7.2 2.5 10.3l7.2-5.7z"/>
-              <path fill="#34A853" d="M24 47c5.5 0 10.2-1.8 13.6-4.9l-7.3-5.7c-1.8 1.2-4.2 1.9-6.3 1.9-6.3 0-11.6-4.2-13.3-9.9l-7.2 5.7C7 41.3 14.8 47 24 47z"/>
-            </svg>
-            Google로 계속하기
-          </button>
+          {inAppBrowser ? (
+            /* 인앱 브라우저: 안내 메시지 + 외부 브라우저로 열기 */
+            <div style={{
+              border: '0.5px solid #F5C2B0', borderRadius: 9,
+              background: '#FAECE7', padding: '12px 14px',
+            }}>
+              <div style={{ fontSize: 12, color: '#7A3010', fontWeight: 600, marginBottom: 6 }}>
+                ⚠️ Google 로그인을 사용할 수 없어요
+              </div>
+              <div style={{ fontSize: 11, color: '#993C1D', lineHeight: 1.6, marginBottom: 10 }}>
+                카카오톡·인스타그램 등 앱 내 브라우저는<br />
+                Google 정책으로 인해 로그인이 차단됩니다.<br />
+                <strong>Chrome 또는 Safari</strong>에서 열어주세요.
+              </div>
+              <a
+                href={`intent://caritas6.github.io/GAI_Platform/login/#Intent;scheme=https;package=com.android.chrome;end`}
+                style={{
+                  display: 'block', textAlign: 'center',
+                  padding: '8px', borderRadius: 7,
+                  background: '#534AB7', color: '#fff',
+                  fontSize: 12, fontWeight: 600,
+                  textDecoration: 'none', marginBottom: 6,
+                }}
+              >
+                Chrome으로 열기 (Android)
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText('https://caritas6.github.io/GAI_Platform/login/')
+                    .then(() => alert('링크를 복사했어요. Safari에서 붙여넣기 해주세요.'))
+                    .catch(() => alert('https://caritas6.github.io/GAI_Platform/login/'));
+                }}
+                style={{
+                  width: '100%', padding: '7px', borderRadius: 7,
+                  border: '0.5px solid #F5C2B0', background: 'transparent',
+                  color: '#993C1D', fontSize: 11, cursor: 'pointer',
+                }}
+              >
+                링크 복사 (Safari에서 붙여넣기)
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGoogle}
+              disabled={loading}
+              style={{
+                width: '100%', padding: '9px', border: '0.5px solid var(--color-border)',
+                borderRadius: 9, background: 'var(--color-bg-primary)',
+                cursor: loading ? 'not-allowed' : 'pointer', fontSize: 13,
+                color: 'var(--color-text-secondary)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'background .15s',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 2.9l6-6C34.5 3.1 29.6 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.4 13.7 17.7 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.2 5.2-4.7 6.8l7.3 5.7c4.3-4 6.7-9.8 6.7-16.5z"/>
+                <path fill="#FBBC05" d="M10.7 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7-5.4A23 23 0 0 0 1 24c0 3.7.9 7.2 2.5 10.3l7.2-5.7z"/>
+                <path fill="#34A853" d="M24 47c5.5 0 10.2-1.8 13.6-4.9l-7.3-5.7c-1.8 1.2-4.2 1.9-6.3 1.9-6.3 0-11.6-4.2-13.3-9.9l-7.2 5.7C7 41.3 14.8 47 24 47z"/>
+              </svg>
+              Google로 계속하기
+            </button>
+          )}
         </div>
 
         <div style={{
