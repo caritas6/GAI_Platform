@@ -50,7 +50,11 @@ export default function HomePage() {
   const [loadingVote,   setLoadingVote]   = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) {
+      setLoadingProj(false);
+      setLoadingVote(false);
+      return;
+    }
     const unsubs: (() => void)[] = [];
 
     /* ① 내 참여 프로젝트 — memberUids 배열에 uid 포함된 문서 */

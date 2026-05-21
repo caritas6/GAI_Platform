@@ -57,12 +57,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* Firestore 프로필 로드 */
   const loadProfile = async (uid: string): Promise<UserProfile | null> => {
+    if (!db) return null;
     const snap = await getDoc(doc(db, 'users', uid));
     return snap.exists() ? (snap.data() as UserProfile) : null;
   };
 
   /* Auth 상태 감시 */
   useEffect(() => {
+    if (!auth) {
+      // Firebase 초기화 실패 시 로딩 해제
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -78,11 +84,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* 이메일 로그인 */
   const login = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase가 초기화되지 않았습니다.');
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   /* Google 로그인 */
   const loginGoogle = async () => {
+    if (!auth || !db) throw new Error('Firebase가 초기화되지 않았습니다.');
     const provider = new GoogleAuthProvider();
     const cred = await signInWithPopup(auth, provider);
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
@@ -106,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     displayName: string,
     role: UserRole,
   ) => {
+    if (!auth || !db) throw new Error('Firebase가 초기화되지 않았습니다.');
     const ROLE_DEPT: Record<UserRole, string> = {
       student:    'KBU 디자인학과',
       professor:  'KBU 디자인학과 교수진',
@@ -127,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* 로그아웃 */
   const logout = async () => {
+    if (!auth) return;
     await signOut(auth);
     setProfile(null);
   };
