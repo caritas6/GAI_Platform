@@ -22,17 +22,16 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
-/* ── 모바일 / 인앱 브라우저 감지 ── */
-function isInAppOrMobile(): boolean {
+/* ── 인앱 WebView 감지 (진짜 WebView만 — 일반 Chrome/Safari 제외) ── */
+function isInAppBrowser(): boolean {
   if (typeof window === 'undefined') return false;
   const ua = navigator.userAgent;
-  // 인앱 브라우저: 카카오톡, 인스타그램, 네이버, 라인, 페이스북, 트위터 등
-  if (/KAKAOTALK|NAVER|Instagram|FBAV|FB\/|Line\/|Twitter/i.test(ua)) return true;
-  // Android/iOS WebView
-  if (/wv\b/i.test(ua)) return true;
-  // 일반 모바일 (팝업이 불안정한 환경)
-  if (/Android|iPhone|iPad|iPod/i.test(ua)) return true;
+  // 명시적 인앱 브라우저: 카카오톡, 인스타그램, 네이버앱, 라인, 페이스북, 트위터, WeChat
+  if (/KAKAOTALK|NAVER|Instagram|FBAV|FB\/|FBAN|Line\/|Twitter|MicroMessenger/i.test(ua)) return true;
+  // Android WebView (Chrome 아님) — wv 플래그 있고 Chrome/ 없음
+  if (/Android/i.test(ua) && /wv\b/i.test(ua) && !/Chrome\//i.test(ua)) return true;
   return false;
+  // ⚠️ 일반 Android Chrome / iOS Safari 는 여기서 false → signInWithPopup 사용
 }
 
 /* ── 역할 타입 ── */
@@ -129,9 +128,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!auth || !db) throw new Error('Firebase가 초기화되지 않았습니다.');
     const provider = new GoogleAuthProvider();
 
-    // 모바일 → signInWithRedirect (팝업 차단 우회)
-    // 반환 후 router.replace 등 추가 네비게이션 금지 — Google로 이동하는 중
-    if (isInAppOrMobile()) {
+    // 인앱 WebView → signInWithRedirect (팝업 불가 환경만)
+    // 일반 Chrome/Safari 는 signInWithPopup 사용
+    if (isInAppBrowser()) {
       await signInWithRedirect(auth, provider);
       return true; // 페이지가 Google로 이동, 호출부에서 router.replace 금지
     }
