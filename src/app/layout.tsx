@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Nav from '@/components/Nav';
+import { AuthProvider } from '@/lib/auth-context';
+import LayoutShell from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
   title: 'G·A·I Platform',
@@ -15,25 +16,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <div
-          style={{
-            maxWidth: 720,
-            margin: '0 auto',
-            padding: '24px 16px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--color-text-tertiary)',
-              marginBottom: 10,
-            }}
-          >
-            G·A·I Platform — v0.1
-          </div>
-          <Nav />
-          <main>{children}</main>
-        </div>
+        {/* AuthProvider: 전체 앱의 인증 상태 관리 */}
+        <AuthProvider>
+          {/* LayoutShell: 로그인 페이지 / 일반 페이지 레이아웃 분기 */}
+          <LayoutShell>{children}</LayoutShell>
+        </AuthProvider>
       </body>
     </html>
   );
