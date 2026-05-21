@@ -1,10 +1,11 @@
 /* ═══════════════════════════════════════
-   G·A·I Platform — firebase.js v0.4
+   G·A·I Platform — firebase.js v0.5
    Firebase 초기화 · 공통 유틸
    ═══════════════════════════════════════
-   ⚠️  아래 firebaseConfig를 본인의 Firebase
-       프로젝트 설정값으로 교체하세요.
-       Firebase Console → 프로젝트 설정 → 앱 추가
+   설정값은 firebase.config.js 에서 불러옵니다.
+   firebase.config.js 는 .gitignore로 보호됩니다.
+   처음 실행 시: firebase.config.example.js 를
+   firebase.config.js 로 복사 후 실제 값 입력
    ═══════════════════════════════════════ */
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -12,17 +13,7 @@ import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection,
          addDoc, getDocs, onSnapshot, serverTimestamp, increment,
          query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-/* ── Firebase 설정 (본인 프로젝트로 교체) ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyCoNHbZNqiDil3nFDk1Ry2MIoUSPnDZ8A8",
-  authDomain: "g-a-i2026.firebaseapp.com",
-  projectId: "g-a-i2026",
-  storageBucket: "g-a-i2026.appspot.com",
-  messagingSenderId: "903996714406",
-  appId: "1:903996714406:web:4dce52554343d00bf47367",
-  measurementId: "G-TZV926FH73"
-};
+import { firebaseConfig } from './firebase.config.js';
 
 /* ── 초기화 ── */
 const app  = initializeApp(firebaseConfig);
