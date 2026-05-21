@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G·A·I Platform — AI Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F2;--bg2:#EFEDE8;--surface:#FDFCFA;
+  --border:rgba(60,52,137,.10);--border2:rgba(60,52,137,.18);
+  --teal:#0F6E56;--teal-l:#E1F5EE;--teal-m:#1D9E75;
+  --purple:#534AB7;--purple-l:#EEEDFE;--purple-m:#7F77DD;
+  --amber:#BA7517;--amber-l:#FAEEDA;
+  --coral:#993C1D;--coral-l:#FAECE7;
+  --pink:#993556;--pink-l:#FBEAF0;
+  --text:#1A1A1A;--text2:#4A4845;--text3:#7A7874;--text4:#A8A5A0;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --sidebar:230px;--topbar:54px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes typing{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.fade-up{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.2) both}
+.d1{animation-delay:.04s}.d2{animation-delay:.10s}.d3{animation-delay:.16s}.d4{animation-delay:.22s}.d5{animation-delay:.28s}
+#app{display:flex;min-height:100vh}
+#sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding-bottom:20px;}
+.sb-logo{padding:16px 20px 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.logo-mark{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--purple);letter-spacing:.08em}
+.logo-sub{font-size:9px;color:var(--text3);margin-top:3px;font-family:var(--mono);letter-spacing:.04em;line-height:1.5}
+.sb-sec{padding:10px 14px 4px;font-size:9px;font-family:var(--mono);color:var(--text4);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px 8px 20px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;border-left:2.5px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{color:var(--purple);border-left-color:var(--purple);background:var(--purple-l);font-weight:500}
+.nav-icon{width:16px;height:16px;opacity:.55;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.role-wrap{padding:10px 14px;border-top:1px solid var(--border);margin-top:6px}
+.role-lbl{font-size:9px;font-family:var(--mono);color:var(--text4);letter-spacing:.10em;text-transform:uppercase;margin-bottom:6px}
+.role-badge{display:inline-block;font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);background:var(--bg)}
+.sb-bottom{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.uname{font-size:12px;font-weight:500;color:var(--text)}
+.udept{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.logout-btn{width:100%;font-size:10px;padding:6px;border:1px solid var(--border2);border-radius:8px;background:none;cursor:pointer;color:var(--text3);font-family:var(--mono);transition:all .15s}
+.logout-btn:hover{background:var(--bg2)}
+#main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.page-title{font-size:13px;font-weight:500;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);background:var(--bg);display:inline-flex;align-items:center;gap:4px;}
+.badge.green{background:var(--teal-l);color:var(--teal);border-color:rgba(15,110,86,.2)}
+.badge.purple{background:var(--purple-l);color:var(--purple);border-color:rgba(83,74,183,.2)}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--teal-m);animation:pulse 2s infinite}
+.content{padding:28px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:18px 20px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.mc{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
+.mc-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.05em;margin-bottom:6px}
+.mc-val{font-size:26px;font-weight:300;color:var(--text);line-height:1;margin-bottom:4px}
+.mc-sub{font-size:10px;color:var(--text4)}
+.sec-title{font-size:10px;font-family:var(--mono);color:var(--text4);letter-spacing:.10em;text-transform:uppercase;margin-bottom:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.grid-13{display:grid;grid-template-columns:200px 1fr;gap:16px}
+.grid-14{display:grid;grid-template-columns:180px 1fr;gap:16px}
+.prog{height:4px;background:var(--bg2);border-radius:2px;margin-top:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.22,.68,0,1.2)}
+.progress-wrap{height:4px;background:var(--bg2);border-radius:2px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.22,.68,0,1.2)}
+.tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;margin:2px 3px 2px 0}
+.tag-teal{background:var(--teal-l);color:var(--teal)}
+.tag-purple{background:var(--purple-l);color:var(--purple)}
+.tag-amber{background:var(--amber-l);color:var(--amber)}
+.tag-coral{background:var(--coral-l);color:var(--coral)}
+.tag-pink{background:var(--pink-l);color:var(--pink)}
+.tag-gray{background:var(--bg2);color:var(--text3)}
+.li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.li:first-child{padding-top:0}
+.li-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.li-meta{font-size:11px;color:var(--text3)}
+button,a.btn{font-family:var(--sans);cursor:pointer}
+.btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn:hover{background:var(--bg2)}
+.btn-primary{background:#534AB7;border-color:#534AB7;color:#fff}
+.btn-primary:hover{background:#3C3489}
+.btn-teal{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn-teal:hover{background:#085041}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-xs{padding:3px 9px;font-size:10px;font-family:var(--mono)}
+input[type=text],input[type=search],input[type=email],input[type=password],select,textarea{font-family:var(--sans);font-size:13px;padding:8px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+input:focus,select:focus{border-color:var(--purple-m)}
+select{cursor:pointer}
+.research-banner{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 20px;margin-bottom:16px;border-left:3px solid var(--purple);}
+.rk{font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:.12em;margin-bottom:6px}
+.rt{font-size:12px;color:var(--text2);line-height:1.75}
+.insight-card{background:var(--purple-l);border:1px solid rgba(83,74,183,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.insight-label{font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:.10em;margin-bottom:6px}
+.pj-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:10px;transition:all .2s;cursor:pointer;}
+.pj-card:hover{border-color:var(--purple-m);transform:translateY(-1px)}
+.pj-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.company-chip{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--bg2);color:var(--text3);margin-right:6px}
+.detail-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;display:none;}
+.detail-panel.open{display:block}
+.vote-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.vote-item:last-child{border-bottom:none;padding-bottom:0}
+.vote-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.vote-meta{font-size:10px;color:var(--text3);margin-bottom:6px;font-family:var(--mono)}
+.vote-bar-bg{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.vote-bar-fill{height:100%;border-radius:3px;background:var(--teal-m);transition:width .8s cubic-bezier(.22,.68,0,1.2)}
+.voted-badge{display:none;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--teal-l);color:var(--teal);margin-left:8px;}
+.contrib-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px}
+.contrib-item:last-child{border-bottom:none}
+.contrib-score{font-family:var(--mono);font-size:12px;color:var(--teal);font-weight:500}
+.dao-urgency{font-family:var(--mono);font-size:10px;color:var(--coral)}
+.chat-area{background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:14px;min-height:200px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:340px;}
+.chat-row{display:flex;gap:8px;align-items:flex-end}
+.chat-row.user{flex-direction:row-reverse}
+.chat-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;flex-shrink:0;}
+.agent-bubble{padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.55;max-width:90%}
+.bubble-ai{background:var(--bg2);color:var(--text);border-radius:4px 10px 10px 10px}
+.bubble-user{background:var(--purple-l);color:var(--purple);border-radius:10px 4px 10px 10px}
+.typing-dots span{display:inline-block;animation:typing 1.2s infinite;font-size:16px;margin-right:1px;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+.agent-type-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);cursor:pointer;transition:all .15s;margin-bottom:8px;text-align:left;width:100%;}
+.agent-type-btn:hover{border-color:var(--purple-m);background:var(--purple-l)}
+.agent-type-btn.active{border-color:var(--purple);background:var(--purple-l)}
+.agent-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.agent-name{font-size:12px;font-weight:500;color:var(--text);display:block}
+.agent-desc{font-size:10px;color:var(--text3);display:block}
+.shortcut-chip{display:inline-block;font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;color:var(--text3);cursor:pointer;transition:all .15s;margin:3px 4px 3px 0;}
+.shortcut-chip:hover{background:var(--purple-l);color:var(--purple);border-color:rgba(83,74,183,.25)}
+.pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.pf-card{border:1px solid var(--border2);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;background:var(--surface);}
+.pf-card:hover{border-color:var(--purple-m);transform:translateY(-2px)}
+.pf-thumb{height:80px;display:flex;align-items:center;justify-content:center}
+.pf-thumb-label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:3px 8px;border-radius:3px;background:rgba(255,255,255,.6);}
+.pf-info{padding:10px 12px}
+.pf-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.pf-team{font-size:10px;color:var(--text3);margin-bottom:4px}
+.pf-add{border:1.5px dashed var(--border2);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:148px;cursor:pointer;transition:all .15s;}
+.pf-add:hover{border-color:var(--purple-m);background:var(--purple-l)}
+.role-card{border:1px solid var(--border2);border-radius:12px;padding:14px;background:var(--surface);transition:all .18s;}
+.role-card:hover{transform:translateY(-2px);border-color:var(--purple-m)}
+.framework-card{border:1px solid var(--border2);border-radius:12px;padding:16px;background:var(--surface);}
+.fw-kicker{font-size:9px;font-family:var(--mono);letter-spacing:.10em;margin-bottom:6px}
+.fw-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.fw-desc{font-size:11px;color:var(--text2);line-height:1.65}
+#gai-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;font-size:12px;padding:10px 20px;border-radius:20px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s;font-family:var(--sans);white-space:nowrap}</style>
+</head>
+<body>
+<div id="gai-toast"></div>
+<div id="app">
+<nav id="sidebar">
+  <div class="sb-logo"><div class="logo-mark">G·A·I</div><div class="logo-sub">KBU 디자인학과<br>산학 교육 플랫폼 v0.4</div></div>
+  <div class="sb-sec">메인</div>
+  <a href="dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>홈 대시보드</a>
+  <a href="intro.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.2v.5"/></svg>플랫폼 소개</a>
+  <a href="project.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="2.5"/></svg>프로젝트 매칭</a>
+  <div class="sb-sec">학습</div>
+  <a href="agent.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M5.5 6.5C5.5 5 10.5 5 10.5 6.5S8 9 8 10"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg>AI Agent</a>
+  <div class="sb-sec">커뮤니티</div>
+  <a href="dao.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="4" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="13" cy="12" r="2"/><path d="M8 6v2.5M8 8.5l-3 2M8 8.5l3 2"/></svg>DAO 거버넌스</a>
+  <a href="portfolio.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="10" rx="1.5"/><path d="M5 3.5V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1"/><path d="M4 8h8M4 11h5"/></svg>포트폴리오</a>
+  <div class="role-wrap"><div class="role-lbl">내 역할</div><span class="role-badge" id="role-badge">로딩 중...</span></div>
+  <div class="sb-bottom">
+    <div class="user-chip"><div class="avatar" id="sb-avatar">?</div><div><div class="uname" id="sb-name">로딩 중...</div><div class="udept" id="sb-dept">KBU 디자인학과</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">로그아웃 / 역할 변경</button>
+  </div>
+</nav>
+<div id="main">
+  <div class="topbar"><div class="page-title">AI Agent</div><div class="topbar-right"><span class="badge green"><span class="dot"></span>HCAI 활성</span><span class="badge" id="session-count" style="color:var(--purple)">세션: —</span></div></div>
+  <div class="content">
+    <div class="research-banner fade-up d1">
+      <div class="rk">HCAI — Human-Centered AI Agent · Firestore 세션 저장</div>
+      <div class="rt"><strong>G·A·I Platform AI Agent</strong>는 HCAI 원칙에 따라 설계됩니다. 모든 대화는 Firestore에 저장되어 연구 데이터로 활용됩니다. 최종 판단은 항상 학습자가 합니다.</div>
+    </div>
+    <div class="grid-13">
+      <div class="fade-up d1">
+        <div class="sec-title">Agent 유형</div>
+        <button class="agent-type-btn active" onclick="selectAgent(this,'리서치 Agent','논문·사례·이론 수집','research')">
+          <div class="agent-icon" style="background:var(--purple-l)">🔍</div>
+          <div><span class="agent-name">리서치 Agent</span><span class="agent-desc">논문 · 사례 · 이론 수집</span></div>
+        </button>
+        <button class="agent-type-btn" onclick="selectAgent(this,'피드백 Agent','HCI 기반 결과물 리뷰','feedback')">
+          <div class="agent-icon" style="background:var(--teal-l)">💬</div>
+          <div><span class="agent-name">피드백 Agent</span><span class="agent-desc">결과물 리뷰 · 개선 제안</span></div>
+        </button>
+        <button class="agent-type-btn" onclick="selectAgent(this,'멘토링 Agent','프로세스 · 방법론 가이드','mentor')">
+          <div class="agent-icon" style="background:var(--amber-l)">🧭</div>
+          <div><span class="agent-name">멘토링 Agent</span><span class="agent-desc">프로세스 · 방법론 가이드</span></div>
+        </button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="sec-title">연결 프로젝트</div>
+          <select style="width:100%;margin-bottom:10px" onchange="agentState.project=this.value">
+            <option>스마트 라이빙 UX 리디자인</option>
+            <option>AR 내비게이션 인터페이스</option>
+            <option>공공 키오스크 접근성 개선</option>
+            <option>㈜제니스케어 UX/브랜딩</option>
+            <option>㈜티지화이어 비주얼 아이덴티티</option>
+            <option>상현내추럴 브랜드 리뉴얼</option>
+            <option>친정엄마 서비스 UX</option>
+          </select>
+          <div style="padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11px">
+            <div class="sec-title" style="margin-bottom:5px">세션 정보</div>
+            <div class="li-meta">오늘: <span id="today-sessions">—</span>회 · 누적: <span id="total-sessions">—</span>회</div>
+            <div style="font-size:10px;color:var(--purple);margin-top:4px;font-family:var(--mono)">HCAI 원칙 적용 중</div>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up d2">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="sec-title" style="margin:0" id="agent-title">리서치 Agent — 대화</div>
+          <span class="badge green"><span class="dot"></span>활성</span>
+        </div>
+        <div class="chat-area" id="chat-area">
+          <div class="chat-row">
+            <div class="chat-avatar" style="background:var(--purple-l);color:var(--purple)">AI</div>
+            <div class="agent-bubble bubble-ai">안녕하세요. 리서치 Agent입니다.<br><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">모든 대화는 Firestore에 저장됩니다.</span><br>무엇이든 질문해주세요.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="chat-input" placeholder="Agent에게 질문하기..." onkeydown="if(event.key==='Enter') sendMsg()">
+          <button class="btn btn-primary" onclick="sendMsg()">전송</button>
+        </div>
+        <div>
+          <div class="sec-title">빠른 질문</div>
+          <span class="shortcut-chip" onclick="setP('HCI 관련 최신 논문 5편 찾아줘')">관련 논문</span>
+          <span class="shortcut-chip" onclick="setP('결과물 HCI 기반 피드백 줘')">결과물 피드백</span>
+          <span class="shortcut-chip" onclick="setP('다음 디자인 프로세스 단계 안내해줘')">다음 단계</span>
+          <span class="shortcut-chip" onclick="setP('HCAI 관점에서 AI 협업 설명해줘')">HCAI 이론</span>
+          <span class="shortcut-chip" onclick="setP('DAO 거버넌스 교육 적용 사례 찾아줘')">DAO 사례</span>
+          <span class="shortcut-chip" onclick="setP('접근성 평가 체크리스트 만들어줘')">접근성 체크리스트</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script type="module">
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, onSnapshot, collection, addDoc,
+         updateDoc, increment, serverTimestamp, getDocs, query, orderBy }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCoNHbZNqiDil3nFDk1Ry2MIoUSPnDZ8A8",
+  authDomain:"g-a-i2026.firebaseapp.com",
+  projectId:"g-a-i2026",
+  storageBucket:"g-a-i2026.appspot.com",
+  messagingSenderId:"903996714406",
+  appId:"1:903996714406:web:4dce52554343d00bf47367"
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const ROLE_LABEL = {student:'학생',professor:'교수 · 교육자',industry:'산업체 파트너',researcher:'외부 연구자'};
+const ROLE_INIT  = {student:'학생',professor:'교수',industry:'기업',researcher:'연구'};
+function applyProfile(p) {
+  document.getElementById('sb-name').textContent    = p.displayName || '사용자';
+  document.getElementById('sb-dept').textContent    = p.dept || 'KBU 디자인학과';
+  document.getElementById('sb-avatar').textContent  = ROLE_INIT[p.role] || '?';
+  document.getElementById('role-badge').textContent = ROLE_LABEL[p.role] || p.role;
+}
+function showToast(msg) {
+  let t = document.getElementById('gai-toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._tid); t._tid = setTimeout(()=>t.style.opacity='0',3000);
+}
+window.doLogout = async () => { await signOut(auth); location.href = 'index.html'; };
+window.toggleDetail = id => document.getElementById(id)?.classList.toggle('open');
+window.showToast = showToast;
+
+const SYSTEM = {
+  research:`당신은 KBU 디자인학과 G·A·I Platform 리서치 AI Agent입니다. HCI, UX, HCAI 논문과 이론을 중심으로 한국어로 200자 이내 답변하세요.`,
+  feedback:`당신은 KBU 디자인학과 G·A·I Platform 피드백 AI Agent입니다. HCI 원칙 기반 디자인 결과물 개선 제안을 한국어로 200자 이내 답변하세요.`,
+  mentor:`당신은 KBU 디자인학과 G·A·I Platform 멘토링 AI Agent입니다. 디자인 산학 프로젝트 단계별 방법론을 한국어로 200자 이내 안내하세요.`
+};
+const agentState = { type:'research', project:'스마트 라이빙 UX 리디자인', history:[] };
+let currentUser=null, userRole='student';
+
+window.selectAgent = (btn,name,desc,type) => {
+  document.querySelectorAll('.agent-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  agentState.type=type; agentState.history=[];
+  document.getElementById('agent-title').textContent=name+' — 대화';
+  document.getElementById('chat-area').innerHTML=`<div class="chat-row"><div class="chat-avatar" style="background:var(--purple-l);color:var(--purple)">AI</div><div class="agent-bubble bubble-ai"><strong>${name}</strong>입니다.<br><span style="font-size:11px;color:var(--text3)">${desc}</span><br>무엇이든 질문해주세요.</div></div>`;
+};
+
+window.setP = txt => { document.getElementById('chat-input').value=txt; document.getElementById('chat-input').focus(); };
+
+window.sendMsg = async () => {
+  const inp=document.getElementById('chat-input');
+  const val=inp.value.trim(); if(!val)return; inp.value='';
+  const area=document.getElementById('chat-area');
+  const INIT={student:'학생',professor:'교수',industry:'기업',researcher:'연구'};
+  const ur=document.createElement('div'); ur.className='chat-row user';
+  ur.innerHTML=`<div class="chat-avatar" style="background:var(--bg2);color:var(--text2)">${INIT[userRole]||'나'}</div><div class="agent-bubble bubble-user">${val}</div>`;
+  area.appendChild(ur); area.scrollTop=area.scrollHeight;
+  agentState.history.push({role:'user',content:val});
+  const ar=document.createElement('div'); ar.className='chat-row';
+  const bubble=document.createElement('div'); bubble.className='agent-bubble bubble-ai';
+  bubble.innerHTML='<span class="typing-dots"><span>·</span><span>·</span><span>·</span></span>';
+  ar.innerHTML=`<div class="chat-avatar" style="background:var(--purple-l);color:var(--purple)">AI</div>`;
+  ar.appendChild(bubble); area.appendChild(ar); area.scrollTop=area.scrollHeight;
+  try {
+    const sys=`${SYSTEM[agentState.type]}\n\n사용자 역할: ${userRole}\n현재 프로젝트: ${agentState.project}`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:sys,messages:agentState.history.slice(-8)})
+    });
+    const data=await res.json();
+    const reply=data.content?.find(c=>c.type==='text')?.text||'응답 오류';
+    agentState.history.push({role:'assistant',content:reply});
+    bubble.textContent='';
+    for(const ch of reply){ bubble.textContent+=ch; await new Promise(r=>setTimeout(r,16)); }
+    if(currentUser) {
+      await addDoc(collection(db,'users',currentUser.uid,'agentSessions'),{
+        agentType:agentState.type,project:agentState.project,userMsg:val,aiReply:reply,createdAt:serverTimestamp()
+      });
+      await updateDoc(doc(db,'users',currentUser.uid),{score:increment(2)});
+    }
+  } catch(e) { bubble.innerHTML=`<span style="color:var(--coral)">⚠ API 오류: ${e.message}</span>`; }
+  area.scrollTop=area.scrollHeight;
+};
+
+
+  /* Firestore 프로필 로드 — 회원가입 직후 저장 지연 대비 최대 5회 재시도 */
+  async function loadProfile(uid, email) {
+    for (let i = 0; i < 5; i++) {
+      const s = await getDoc(doc(db,'users',uid));
+      if (s.exists()) return s.data();
+      await new Promise(r => setTimeout(r, 800));
+    }
+    /* 기본값 반환 (무한루프 방지) */
+    return { displayName: email?.split('@')[0]||'사용자', dept:'KBU 디자인학과', role:'student', score:0, badges:[] };
+  }
+
+onAuthStateChanged(auth, async user=>{
+  if(!user){location.href='index.html';return;}
+  currentUser=user;
+  const p=await loadProfile(user.uid,user.email); applyProfile(p); userRole=p.role||'student';
+  try{
+    const sessions=await getDocs(query(collection(db,'users',user.uid,'agentSessions'),orderBy('createdAt','desc')));
+    document.getElementById('total-sessions').textContent=sessions.size;
+    const today=new Date().toDateString();
+    const todayN=sessions.docs.filter(d=>{const ts=d.data().createdAt?.toDate?.();return ts&&ts.toDateString()===today;}).length;
+    document.getElementById('today-sessions').textContent=todayN;
+    document.getElementById('session-count').textContent=`세션: ${sessions.size}회`;
+  }catch(e){console.warn(e);}
+});
+</script>
+</body>
+</html>

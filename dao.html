@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G·A·I Platform — DAO 거버넌스</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F2;--bg2:#EFEDE8;--surface:#FDFCFA;
+  --border:rgba(60,52,137,.10);--border2:rgba(60,52,137,.18);
+  --teal:#0F6E56;--teal-l:#E1F5EE;--teal-m:#1D9E75;
+  --purple:#534AB7;--purple-l:#EEEDFE;--purple-m:#7F77DD;
+  --amber:#BA7517;--amber-l:#FAEEDA;
+  --coral:#993C1D;--coral-l:#FAECE7;
+  --pink:#993556;--pink-l:#FBEAF0;
+  --text:#1A1A1A;--text2:#4A4845;--text3:#7A7874;--text4:#A8A5A0;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --sidebar:230px;--topbar:54px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes typing{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.fade-up{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.2) both}
+.d1{animation-delay:.04s}.d2{animation-delay:.10s}.d3{animation-delay:.16s}.d4{animation-delay:.22s}.d5{animation-delay:.28s}
+#app{display:flex;min-height:100vh}
+#sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding-bottom:20px;}
+.sb-logo{padding:16px 20px 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.logo-mark{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--purple);letter-spacing:.08em}
+.logo-sub{font-size:9px;color:var(--text3);margin-top:3px;font-family:var(--mono);letter-spacing:.04em;line-height:1.5}
+.sb-sec{padding:10px 14px 4px;font-size:9px;font-family:var(--mono);color:var(--text4);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px 8px 20px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;border-left:2.5px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{color:var(--purple);border-left-color:var(--purple);background:var(--purple-l);font-weight:500}
+.nav-icon{width:16px;height:16px;opacity:.55;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.role-wrap{padding:10px 14px;border-top:1px solid var(--border);margin-top:6px}
+.role-lbl{font-size:9px;font-family:var(--mono);color:var(--text4);letter-spacing:.10em;text-transform:uppercase;margin-bottom:6px}
+.role-badge{display:inline-block;font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);background:var(--bg)}
+.sb-bottom{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.uname{font-size:12px;font-weight:500;color:var(--text)}
+.udept{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.logout-btn{width:100%;font-size:10px;padding:6px;border:1px solid var(--border2);border-radius:8px;background:none;cursor:pointer;color:var(--text3);font-family:var(--mono);transition:all .15s}
+.logout-btn:hover{background:var(--bg2)}
+#main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.page-title{font-size:13px;font-weight:500;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);background:var(--bg);display:inline-flex;align-items:center;gap:4px;}
+.badge.green{background:var(--teal-l);color:var(--teal);border-color:rgba(15,110,86,.2)}
+.badge.purple{background:var(--purple-l);color:var(--purple);border-color:rgba(83,74,183,.2)}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--teal-m);animation:pulse 2s infinite}
+.content{padding:28px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:18px 20px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.mc{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
+.mc-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.05em;margin-bottom:6px}
+.mc-val{font-size:26px;font-weight:300;color:var(--text);line-height:1;margin-bottom:4px}
+.mc-sub{font-size:10px;color:var(--text4)}
+.sec-title{font-size:10px;font-family:var(--mono);color:var(--text4);letter-spacing:.10em;text-transform:uppercase;margin-bottom:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.grid-13{display:grid;grid-template-columns:200px 1fr;gap:16px}
+.grid-14{display:grid;grid-template-columns:180px 1fr;gap:16px}
+.prog{height:4px;background:var(--bg2);border-radius:2px;margin-top:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.22,.68,0,1.2)}
+.progress-wrap{height:4px;background:var(--bg2);border-radius:2px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.22,.68,0,1.2)}
+.tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;margin:2px 3px 2px 0}
+.tag-teal{background:var(--teal-l);color:var(--teal)}
+.tag-purple{background:var(--purple-l);color:var(--purple)}
+.tag-amber{background:var(--amber-l);color:var(--amber)}
+.tag-coral{background:var(--coral-l);color:var(--coral)}
+.tag-pink{background:var(--pink-l);color:var(--pink)}
+.tag-gray{background:var(--bg2);color:var(--text3)}
+.li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.li:first-child{padding-top:0}
+.li-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.li-meta{font-size:11px;color:var(--text3)}
+button,a.btn{font-family:var(--sans);cursor:pointer}
+.btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn:hover{background:var(--bg2)}
+.btn-primary{background:#534AB7;border-color:#534AB7;color:#fff}
+.btn-primary:hover{background:#3C3489}
+.btn-teal{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn-teal:hover{background:#085041}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-xs{padding:3px 9px;font-size:10px;font-family:var(--mono)}
+input[type=text],input[type=search],input[type=email],input[type=password],select,textarea{font-family:var(--sans);font-size:13px;padding:8px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+input:focus,select:focus{border-color:var(--purple-m)}
+select{cursor:pointer}
+.research-banner{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 20px;margin-bottom:16px;border-left:3px solid var(--purple);}
+.rk{font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:.12em;margin-bottom:6px}
+.rt{font-size:12px;color:var(--text2);line-height:1.75}
+.insight-card{background:var(--purple-l);border:1px solid rgba(83,74,183,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.insight-label{font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:.10em;margin-bottom:6px}
+.pj-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:10px;transition:all .2s;cursor:pointer;}
+.pj-card:hover{border-color:var(--purple-m);transform:translateY(-1px)}
+.pj-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.company-chip{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--bg2);color:var(--text3);margin-right:6px}
+.detail-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;display:none;}
+.detail-panel.open{display:block}
+.vote-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.vote-item:last-child{border-bottom:none;padding-bottom:0}
+.vote-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.vote-meta{font-size:10px;color:var(--text3);margin-bottom:6px;font-family:var(--mono)}
+.vote-bar-bg{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.vote-bar-fill{height:100%;border-radius:3px;background:var(--teal-m);transition:width .8s cubic-bezier(.22,.68,0,1.2)}
+.voted-badge{display:none;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--teal-l);color:var(--teal);margin-left:8px;}
+.contrib-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px}
+.contrib-item:last-child{border-bottom:none}
+.contrib-score{font-family:var(--mono);font-size:12px;color:var(--teal);font-weight:500}
+.dao-urgency{font-family:var(--mono);font-size:10px;color:var(--coral)}
+.chat-area{background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:14px;min-height:200px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:340px;}
+.chat-row{display:flex;gap:8px;align-items:flex-end}
+.chat-row.user{flex-direction:row-reverse}
+.chat-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;flex-shrink:0;}
+.agent-bubble{padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.55;max-width:90%}
+.bubble-ai{background:var(--bg2);color:var(--text);border-radius:4px 10px 10px 10px}
+.bubble-user{background:var(--purple-l);color:var(--purple);border-radius:10px 4px 10px 10px}
+.typing-dots span{display:inline-block;animation:typing 1.2s infinite;font-size:16px;margin-right:1px;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+.agent-type-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);cursor:pointer;transition:all .15s;margin-bottom:8px;text-align:left;width:100%;}
+.agent-type-btn:hover{border-color:var(--purple-m);background:var(--purple-l)}
+.agent-type-btn.active{border-color:var(--purple);background:var(--purple-l)}
+.agent-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.agent-name{font-size:12px;font-weight:500;color:var(--text);display:block}
+.agent-desc{font-size:10px;color:var(--text3);display:block}
+.shortcut-chip{display:inline-block;font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;color:var(--text3);cursor:pointer;transition:all .15s;margin:3px 4px 3px 0;}
+.shortcut-chip:hover{background:var(--purple-l);color:var(--purple);border-color:rgba(83,74,183,.25)}
+.pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.pf-card{border:1px solid var(--border2);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;background:var(--surface);}
+.pf-card:hover{border-color:var(--purple-m);transform:translateY(-2px)}
+.pf-thumb{height:80px;display:flex;align-items:center;justify-content:center}
+.pf-thumb-label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:3px 8px;border-radius:3px;background:rgba(255,255,255,.6);}
+.pf-info{padding:10px 12px}
+.pf-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.pf-team{font-size:10px;color:var(--text3);margin-bottom:4px}
+.pf-add{border:1.5px dashed var(--border2);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:148px;cursor:pointer;transition:all .15s;}
+.pf-add:hover{border-color:var(--purple-m);background:var(--purple-l)}
+.role-card{border:1px solid var(--border2);border-radius:12px;padding:14px;background:var(--surface);transition:all .18s;}
+.role-card:hover{transform:translateY(-2px);border-color:var(--purple-m)}
+.framework-card{border:1px solid var(--border2);border-radius:12px;padding:16px;background:var(--surface);}
+.fw-kicker{font-size:9px;font-family:var(--mono);letter-spacing:.10em;margin-bottom:6px}
+.fw-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.fw-desc{font-size:11px;color:var(--text2);line-height:1.65}
+#gai-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;font-size:12px;padding:10px 20px;border-radius:20px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s;font-family:var(--sans);white-space:nowrap}</style>
+</head>
+<body>
+<div id="gai-toast"></div>
+<div id="app">
+<nav id="sidebar">
+  <div class="sb-logo"><div class="logo-mark">G·A·I</div><div class="logo-sub">KBU 디자인학과<br>산학 교육 플랫폼 v0.4</div></div>
+  <div class="sb-sec">메인</div>
+  <a href="dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>홈 대시보드</a>
+  <a href="intro.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.2v.5"/></svg>플랫폼 소개</a>
+  <a href="project.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="2.5"/></svg>프로젝트 매칭</a>
+  <div class="sb-sec">학습</div>
+  <a href="agent.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M5.5 6.5C5.5 5 10.5 5 10.5 6.5S8 9 8 10"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg>AI Agent</a>
+  <div class="sb-sec">커뮤니티</div>
+  <a href="dao.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="4" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="13" cy="12" r="2"/><path d="M8 6v2.5M8 8.5l-3 2M8 8.5l3 2"/></svg>DAO 거버넌스</a>
+  <a href="portfolio.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="10" rx="1.5"/><path d="M5 3.5V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1"/><path d="M4 8h8M4 11h5"/></svg>포트폴리오</a>
+  <div class="role-wrap"><div class="role-lbl">내 역할</div><span class="role-badge" id="role-badge">로딩 중...</span></div>
+  <div class="sb-bottom">
+    <div class="user-chip"><div class="avatar" id="sb-avatar">?</div><div><div class="uname" id="sb-name">로딩 중...</div><div class="udept" id="sb-dept">KBU 디자인학과</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">로그아웃 / 역할 변경</button>
+  </div>
+</nav>
+<div id="main">
+  <div class="topbar"><div class="page-title">DAO 거버넌스</div><div class="topbar-right"><span class="badge purple">DAO 투표 D-3</span></div></div>
+  <div class="content">
+    <div class="insight-card fade-up d1">
+      <div class="insight-label">DAO Governance — KBU 디자인학과 · 2025-2학기 · Firebase Firestore 실시간</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7"><strong>학생 · 교수 · 산업체 파트너 · 외부 연구자</strong> 4개 그룹이 동등하게 참여하는 교육 거버넌스. 투표 결과는 Firestore에 실시간 저장됩니다.</div>
+    </div>
+    <div class="metric-grid fade-up d2">
+      <div class="mc"><div class="mc-label">내 기여 점수</div><div class="mc-val" id="dao-score">—</div><div class="mc-sub">Firestore 실시간</div></div>
+      <div class="mc"><div class="mc-label">투표 참여율</div><div class="mc-val" id="m-vote-rate">—</div><div class="mc-sub">이번 학기</div></div>
+      <div class="mc"><div class="mc-label">보유 뱃지</div><div class="mc-val" id="m-badges">—</div><div class="mc-sub">누적 획득</div></div>
+      <div class="mc"><div class="mc-label">거버넌스 등급</div><div class="mc-val" id="m-grade" style="font-size:20px">—</div><div class="mc-sub">기여 점수 기반</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card fade-up d2">
+        <div class="sec-title">진행 중인 안건 <span style="font-family:var(--mono);font-size:9px;color:var(--teal);margin-left:4px">실시간</span></div>
+        <div class="vote-item" id="vote-v1">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <div class="vote-title">[평가] 산학 평가 루브릭 개정안 <span class="tag tag-coral" style="font-size:9px">긴급</span><span class="voted-badge">투표완료</span></div>
+            <span class="dao-urgency">D-3</span>
+          </div>
+          <div class="vote-meta vote-count">로딩 중...</div>
+          <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:0%"></div></div>
+          <div style="font-size:11px;color:var(--text2);margin:7px 0;line-height:1.6">AI Agent 활용 역량을 평가 루브릭 공식 항목으로 포함하는 개정안.</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-teal btn-xs vote-action-btn" onclick="castVote('v1',true)">찬성</button>
+            <button class="btn btn-xs vote-action-btn" style="color:var(--coral)" onclick="castVote('v1',false)">반대</button>
+          </div>
+        </div>
+        <div class="vote-item" id="vote-v2">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <div class="vote-title">[파트너] 신규 파트너 승인 — ㈜인터렉티브랩 <span class="voted-badge">투표완료</span></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">D-6</span>
+          </div>
+          <div class="vote-meta vote-count">로딩 중...</div>
+          <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:0%"></div></div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-teal btn-xs vote-action-btn" onclick="castVote('v2',true)">찬성</button>
+            <button class="btn btn-xs vote-action-btn" style="color:var(--coral)" onclick="castVote('v2',false)">반대</button>
+          </div>
+        </div>
+        <div class="vote-item" id="vote-v3">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <div class="vote-title">[정책] 외부 연구자 데이터 접근 권한 정책 v1.0 <span class="voted-badge">투표완료</span></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">D-12</span>
+          </div>
+          <div class="vote-meta vote-count">로딩 중...</div>
+          <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:0%"></div></div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-teal btn-xs vote-action-btn" onclick="castVote('v3',true)">찬성</button>
+            <button class="btn btn-xs vote-action-btn" style="color:var(--coral)" onclick="castVote('v3',false)">반대</button>
+          </div>
+        </div>
+        <div class="vote-item" style="border:none;padding-bottom:0">
+          <div class="vote-title">[완료] AI Agent 학습 윤리 가이드라인 v1.2</div>
+          <div class="vote-meta">통과 · 찬성 84% · 2025.09.01 시행</div>
+          <span class="tag tag-teal">시행 중</span>
+        </div>
+      </div>
+      <div class="card fade-up d3">
+        <div class="sec-title">내 기여 이력 <span style="font-family:var(--mono);font-size:9px;color:var(--teal);margin-left:4px">실시간</span></div>
+        <div id="contrib-list"><div style="font-size:11px;color:var(--text4);padding:12px 0;text-align:center">Firestore에서 불러오는 중...</div></div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="sec-title">보유 뱃지</div>
+          <div id="badge-list">—</div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="sec-title">기여 분포</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">
+            <div style="font-size:11px;color:var(--text2);width:80px">프로젝트</div>
+            <div style="flex:1"><div class="progress-wrap" style="margin:0"><div class="progress-fill" id="bar-pj" style="width:0%;background:var(--teal-m)"></div></div></div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="font-size:11px;color:var(--text2);width:80px">투표 참여</div>
+            <div style="flex:1"><div class="progress-wrap" style="margin:0"><div class="progress-fill" id="bar-vote" style="width:0%;background:var(--purple-m)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script type="module">
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, onSnapshot, collection, addDoc,
+         updateDoc, increment, serverTimestamp, getDocs, query, orderBy }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCoNHbZNqiDil3nFDk1Ry2MIoUSPnDZ8A8",
+  authDomain:"g-a-i2026.firebaseapp.com",
+  projectId:"g-a-i2026",
+  storageBucket:"g-a-i2026.appspot.com",
+  messagingSenderId:"903996714406",
+  appId:"1:903996714406:web:4dce52554343d00bf47367"
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const ROLE_LABEL = {student:'학생',professor:'교수 · 교육자',industry:'산업체 파트너',researcher:'외부 연구자'};
+const ROLE_INIT  = {student:'학생',professor:'교수',industry:'기업',researcher:'연구'};
+function applyProfile(p) {
+  document.getElementById('sb-name').textContent    = p.displayName || '사용자';
+  document.getElementById('sb-dept').textContent    = p.dept || 'KBU 디자인학과';
+  document.getElementById('sb-avatar').textContent  = ROLE_INIT[p.role] || '?';
+  document.getElementById('role-badge').textContent = ROLE_LABEL[p.role] || p.role;
+}
+function showToast(msg) {
+  let t = document.getElementById('gai-toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._tid); t._tid = setTimeout(()=>t.style.opacity='0',3000);
+}
+window.doLogout = async () => { await signOut(auth); location.href = 'index.html'; };
+window.toggleDetail = id => document.getElementById(id)?.classList.toggle('open');
+window.showToast = showToast;
+
+let currentUser = null;
+let votedItems  = new Set();
+
+window.castVote = async (voteId, isFor) => {
+  if (!currentUser) return;
+  if (votedItems.has(voteId)) { showToast('이미 투표하셨습니다.'); return; }
+  try {
+    await updateDoc(doc(db,'votes',voteId), {
+      [isFor?'pro':'con']: increment(1), total: increment(1)
+    });
+    const newVoted = [...votedItems, voteId];
+    await updateDoc(doc(db,'users',currentUser.uid), {
+      votedItems: newVoted, score: increment(10)
+    });
+    votedItems.add(voteId);
+    await addDoc(collection(db,'users',currentUser.uid,'contributions'), {
+      label: `[DAO 투표] 안건 참여`, score: 10, createdAt: serverTimestamp()
+    });
+    showToast('투표 완료 — 기여 점수 +10 적립');
+  } catch(e) { showToast('투표 오류: ' + e.message); }
+};
+
+function renderVote(voteId, data) {
+  const el = document.getElementById('vote-' + voteId);
+  if (!el) return;
+  const pct   = Math.round((data.pro||0) / Math.max(data.total||1,1) * 100);
+  const voted = votedItems.has(voteId);
+  el.querySelector('.vote-bar-fill').style.width = pct + '%';
+  el.querySelector('.vote-count').textContent    = `참여 ${data.total||0}명 · 찬성 ${pct}% · 마감 ${data.deadline||''}`;
+  el.querySelectorAll('.vote-action-btn').forEach(b=>{ b.disabled=voted; b.style.opacity=voted?'0.4':'1'; });
+  const badge = el.querySelector('.voted-badge');
+  if (badge) badge.style.display = voted ? 'inline-block' : 'none';
+}
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href='index.html'; return; }
+  currentUser = user;
+  const p = await loadProfile(user.uid,user.email); applyProfile(p);
+  votedItems = new Set(p.votedItems || []);
+  document.getElementById('dao-score').textContent = p.score || 0;
+  document.getElementById('m-badges').textContent  = (p.badges||[]).length;
+  document.getElementById('m-grade').textContent   = (p.score||0)>=500?'Gold':(p.score||0)>=200?'Silver':'Bronze';
+  const badgeColors = {'첫 가입 완료':'tag-purple','우수 기여자':'tag-teal','멘토링 이수':'tag-amber'};
+  document.getElementById('badge-list').innerHTML = (p.badges||['첫 가입 완료']).map(b=>`<span class="tag ${badgeColors[b]||'tag-gray'}">${b}</span>`).join('');
+
+  /* 투표 실시간 */
+  ['v1','v2','v3'].forEach(id => {
+    onSnapshot(doc(db,'votes',id), d => { if(d.exists()) renderVote(id,d.data()); });
+  });
+
+  /* 기여 이력 실시간 */
+  onSnapshot(query(collection(db,'users',user.uid,'contributions'),orderBy('createdAt','desc')), snap => {
+    const items = snap.docs.map(d=>d.data());
+    const list  = document.getElementById('contrib-list');
+    list.innerHTML = items.length
+      ? items.slice(0,10).map(i=>`<div class="contrib-item"><span>${i.label||''}</span><span class="contrib-score">+${i.score||0}</span></div>`).join('')
+      : '<div style="font-size:11px;color:var(--text4);padding:12px 0;text-align:center">아직 기여 이력이 없습니다.</div>';
+    const pj   = items.filter(i=>(i.label||'').includes('투표')).reduce((a,i)=>a+(i.score||0),0);
+    const tot  = Math.max(items.reduce((a,i)=>a+(i.score||0),0),1);
+    document.getElementById('bar-pj').style.width   = Math.round((tot-pj)/tot*100)+'%';
+    document.getElementById('bar-vote').style.width = Math.round(pj/tot*100)+'%';
+    /* 참여율 */
+    const vt = ['v1','v2','v3'].filter(id=>votedItems.has(id)).length;
+    document.getElementById('m-vote-rate').textContent = Math.round(vt/3*100)+'%';
+  });
+});
+</script>
+</body>
+</html>
