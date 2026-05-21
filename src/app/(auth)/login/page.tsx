@@ -79,7 +79,13 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await loginGoogle();
+      const isRedirect = await loginGoogle();
+      if (isRedirect) {
+        // signInWithRedirect: 페이지가 Google로 이동 중
+        // router.replace 호출 금지 — auth 레이아웃이 복귀 후 자동으로 / 로 이동
+        return;
+      }
+      // signInWithPopup (데스크톱): 즉시 홈으로 이동
       router.replace('/');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Google 로그인 오류');

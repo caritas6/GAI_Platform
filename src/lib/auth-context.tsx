@@ -53,14 +53,15 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   login:         (email: string, password: string) => Promise<void>;
-  loginGoogle:   () => Promise<void>;
+  /** true = signInWithRedirect 사용(페이지가 Google로 이동), false = popup 완료 */
+  loginGoogle:   () => Promise<boolean>;
   register:      (email: string, password: string, displayName: string, role: UserRole) => Promise<void>;
   logout:        () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null, profile: null, loading: true,
-  login: async () => {}, loginGoogle: async () => {},
+  login: async () => {}, loginGoogle: async () => false,
   register: async () => {}, logout: async () => {},
 });
 
@@ -123,18 +124,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  /* Google 로그인 */
-  const loginGoogle = async () => {
+  /* Google 로그인 — true: redirect 진행 중, false: popup 완료 */
+  const loginGoogle = async (): Promise<boolean> => {
     if (!auth || !db) throw new Error('Firebase가 초기화되지 않았습니다.');
     const provider = new GoogleAuthProvider();
 
-    // 모바일 / 인앱 브라우저 → 리다이렉트 방식 (팝업 차단 우회)
+    // 모바일 → signInWithRedirect (팝업 차단 우회)
+    // 반환 후 router.replace 등 추가 네비게이션 금지 — Google로 이동하는 중
     if (isInAppOrMobile()) {
       await signInWithRedirect(auth, provider);
-      return; // 페이지가 Google로 이동하므로 이후 코드 실행 안 됨
+      return true; // 페이지가 Google로 이동, 호출부에서 router.replace 금지
     }
 
-    // 데스크톱 → 팝업 방식
+    // 데스크톱 → signInWithPopup
     const cred = await signInWithPopup(auth, provider);
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
     if (!snap.exists()) {
@@ -148,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         createdAt:   serverTimestamp(),
       });
     }
+    return false;
   };
 
   /* 회원가입 */
