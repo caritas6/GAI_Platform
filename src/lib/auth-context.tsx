@@ -16,9 +16,24 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
+
+/* ── 모바일 / 인앱 브라우저 감지 ── */
+function isInAppOrMobile(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // 인앱 브라우저: 카카오톡, 인스타그램, 네이버, 라인, 페이스북, 트위터 등
+  if (/KAKAOTALK|NAVER|Instagram|FBAV|FB\/|Line\/|Twitter/i.test(ua)) return true;
+  // Android/iOS WebView
+  if (/wv\b/i.test(ua)) return true;
+  // 일반 모바일 (팝업이 불안정한 환경)
+  if (/Android|iPhone|iPad|iPod/i.test(ua)) return true;
+  return false;
+}
 
 /* ── 역할 타입 ── */
 export type UserRole = 'student' | 'professor' | 'industry' | 'researcher';
@@ -65,10 +80,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /* Auth 상태 감시 */
   useEffect(() => {
     if (!auth) {
-      // Firebase 초기화 실패 시 로딩 해제
       setLoading(false);
       return;
     }
+
+    // 모바일 리다이렉트 로그인 후 결과 처리
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result && db) {
+          const snap = await getDoc(doc(db, 'users', result.user.uid));
+          if (!snap.exists()) {
+            await setDoc(doc(db, 'users', result.user.uid), {
+              displayName: result.user.displayName || result.user.email?.split('@')[0] || '사용자',
+              email:       result.user.email,
+              role:        'student' as UserRole,
+              dept:        'KBU 디자인학과',
+              score:       0,
+              votedItems:  [],
+              createdAt:   serverTimestamp(),
+            });
+          }
+        }
+      })
+      .catch((e) => console.warn('[Firebase] redirect result 오류:', e));
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -92,6 +127,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginGoogle = async () => {
     if (!auth || !db) throw new Error('Firebase가 초기화되지 않았습니다.');
     const provider = new GoogleAuthProvider();
+
+    // 모바일 / 인앱 브라우저 → 리다이렉트 방식 (팝업 차단 우회)
+    if (isInAppOrMobile()) {
+      await signInWithRedirect(auth, provider);
+      return; // 페이지가 Google로 이동하므로 이후 코드 실행 안 됨
+    }
+
+    // 데스크톱 → 팝업 방식
     const cred = await signInWithPopup(auth, provider);
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
     if (!snap.exists()) {
