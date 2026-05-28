@@ -76,7 +76,12 @@ export async function POST(request: Request) {
     });
 
     // 마지막 메시지를 제외한 대화 기록
-    const history = messages.slice(0, -1).map((m: { role: string; text: string }) => ({
+    // Gemini는 history가 반드시 'user'로 시작해야 하므로 앞쪽 'model' 메시지 제거
+    const allPrev = messages.slice(0, -1);
+    const firstUserIdx = allPrev.findIndex((m: { role: string }) => m.role === 'user');
+    const historyMessages = firstUserIdx >= 0 ? allPrev.slice(firstUserIdx) : [];
+
+    const history = historyMessages.map((m: { role: string; text: string }) => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.text }],
     }));
