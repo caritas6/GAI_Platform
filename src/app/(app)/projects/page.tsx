@@ -342,7 +342,7 @@ function DetailModal({ project, onClose }: { project: Project; onClose: () => vo
               onClick={() => setActiveCase(i)}
               style={{
                 flexShrink: 0,
-                padding: '6px 12px',
+                padding: '6px 14px',
                 borderRadius: 8,
                 border: activeCase === i
                   ? '1.5px solid var(--brand)'
@@ -353,7 +353,7 @@ function DetailModal({ project, onClose }: { project: Project; onClose: () => vo
                 transition: 'all .15s',
               }}
             >
-              {c.caseNum}
+              {c.title}
             </button>
           ))}
         </div>
