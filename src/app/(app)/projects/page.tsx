@@ -7,11 +7,17 @@ import Button from '@/components/Button';
 
 type ProjectStatus = '모집중' | '진행중' | '완료';
 
+interface CaseGroup {
+  label: string;
+  items: string[];
+}
+
 interface CaseDetail {
   caseNum: string;
   title: string;
   subtitle: string;
   items: string[];
+  groups?: CaseGroup[]; // 조직도·다이어그램형 콘텐츠
 }
 
 interface Project {
@@ -107,6 +113,97 @@ const projects: Project[] = [
     tags: [
       { label: '현장실습', variant: 'green' },
       { label: '인턴쉽', variant: 'purple' },
+    ],
+    cases: [
+      {
+        caseNum: 'PROJECT 01',
+        title: '미디어 콘텐츠 제작센터',
+        subtitle: '학교기업 설립 목적 및 기대효과',
+        items: [
+          '학생들의 현장실습 및 인턴십 교육의 활성화',
+          '참여 학생들의 전공 및 진로 탐색의 기회 제공',
+          '지역산업 육성정책에 부응하는 학교기업으로 미디어콘텐츠산업 활성화를 통해 대학 재정에 기여',
+          '협력기업 및 가족 회사와 공동으로 외부프로젝트 수주 및 제작을 통한 상호 시너지 창출',
+          '프로젝트 참여 학생 장학금 지급 확대로 학업성취도 고취',
+          '대학의 다양한 교육프로그램을 산업화에 활용 모델 제시',
+          '고부가가치 첨단 콘텐츠산업분야에 대한 대학의 역할 제고',
+          '지역 로컬 크리에이터 사업화와 연계',
+        ],
+      },
+      {
+        caseNum: 'PROJECT 02',
+        title: '운영방안',
+        subtitle: '미디어콘텐츠 제작센터 중심 협력 구조',
+        items: [],
+        groups: [
+          {
+            label: '🎯 미디어콘텐츠 제작센터 (중심)',
+            items: ['영상/실감 콘텐츠 제작', '용역 수주', '현장실습 및 실무교육', '학교 기업 운영'],
+          },
+          {
+            label: '🏫 경북대학교 산학협력단',
+            items: ['행정·재정지원', '예산집행', '업무관리'],
+          },
+          {
+            label: '📚 경북대학교 영상미디어콘텐츠학과',
+            items: ['학생 현장실습 지원', '기업 기술 지도', '현장 맞춤형 인력 양성'],
+          },
+          {
+            label: '🏛 경기도·남양주시 유관기관',
+            items: ['운영 및 자문 참여', '공동 사업 진행'],
+          },
+          {
+            label: '🏢 유관산업체',
+            items: ['현장실습 운영', '현장기술 교육 참여', '과제용역 공동추진', '로컬크리에이터 사업'],
+          },
+        ],
+      },
+      {
+        caseNum: 'PROJECT 03',
+        title: '수익창출 및 발전방안',
+        subtitle: '지속가능한 수익 모델 구축',
+        items: [
+          '지역의 미디어콘텐츠제작 전문 기업 운영에 따른 영상 콘텐츠 제작',
+          '영상/실감, 콘텐츠, 디자인 등 관련 용역 수주 및 수행',
+          '현장실습을 통한 미디어콘텐츠 전문인력 양성',
+          '고용창출 및 지역 미디어콘텐츠 산업 활성화',
+          '관련기관 및 기업체와 공동 프로젝트 운영',
+          '산업체 애로사항 해결에 필요한 기술지원 및 학교기업 소개',
+          '영상/실감 미디어를 통한 학교기업 인지도 제고',
+          '해외 수출 및 브랜드 인플루언서(외국인 졸업생 및 재학생) 사업',
+          '링크 사업 및 연구지원사업 제안을 통한 연구사업 수행',
+          '타과의 다학제적 융합 프로젝트 협력 의뢰를 통한 수주',
+          '지자체 입찰 수주',
+        ],
+      },
+      {
+        caseNum: 'PROJECT 04',
+        title: '산학협력 생태계',
+        subtitle: '경북대학교 산학협력단 미디어콘텐츠 제작센터 네트워크',
+        items: [],
+        groups: [
+          {
+            label: '✨ 기대효과',
+            items: ['전문인력 양성', '고용창출 및 지역환경개선', '기술이전 및 지역 경제 활성화', '산학협력 활성화'],
+          },
+          {
+            label: '🏛 공공기관',
+            items: ['경기벤처창업지원센터(경기도경제과학진흥원)', '남양주 시청자 미디어센터', '경기콘텐츠진흥원(의정부)'],
+          },
+          {
+            label: '📺 미디어콘텐츠산업',
+            items: ['영상기업', '실감 콘텐츠 기업', '뉴미디어 콘텐츠 기업'],
+          },
+          {
+            label: '🚀 첨단 콘텐츠 산업',
+            items: ['VR/AR/MR/XR', '3D 콘텐츠 산업', '실감 UX/UI 산업', '실감 영상 콘텐츠 산업'],
+          },
+          {
+            label: '🏘 지역산업',
+            items: ['지역 기업체', '로컬 크리에이터 사업'],
+          },
+        ],
+      },
     ],
   },
   {
@@ -299,23 +396,62 @@ function DetailModal({ project, onClose }: { project: Project; onClose: () => vo
               </span>
             </div>
 
-            {/* 세부 항목 */}
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              {current.items.map((item, idx) => (
-                <li key={idx} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 8,
-                  fontSize: 13, color: 'var(--color-text-secondary)',
-                  lineHeight: 1.6, marginBottom: 6,
-                }}>
-                  <span style={{
-                    width: 5, height: 5, borderRadius: '50%',
-                    background: 'var(--color-text-tertiary)',
-                    marginTop: 7, flexShrink: 0,
-                  }} />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {/* 불릿 리스트 항목 */}
+            {current.items.length > 0 && (
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                {current.items.map((item, idx) => (
+                  <li key={idx} style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 8,
+                    fontSize: 13, color: 'var(--color-text-secondary)',
+                    lineHeight: 1.6, marginBottom: 6,
+                  }}>
+                    <span style={{
+                      width: 5, height: 5, borderRadius: '50%',
+                      background: 'var(--color-text-tertiary)',
+                      marginTop: 7, flexShrink: 0,
+                    }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* 그룹 카드 (조직도·다이어그램형) */}
+            {current.groups && current.groups.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {current.groups.map((group, gi) => (
+                  <div key={gi} style={{
+                    border: gi === 0
+                      ? '1.5px solid var(--brand)'
+                      : '0.5px solid var(--color-border)',
+                    borderRadius: 10,
+                    padding: '12px 14px',
+                    background: gi === 0 ? 'var(--brand-light)' : 'var(--color-bg-primary)',
+                  }}>
+                    <div style={{
+                      fontSize: 12, fontWeight: 700,
+                      color: gi === 0 ? 'var(--brand)' : 'var(--color-text-primary)',
+                      marginBottom: 8,
+                    }}>
+                      {group.label}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {group.items.map((item, ii) => (
+                        <span key={ii} style={{
+                          fontSize: 11,
+                          color: 'var(--color-text-secondary)',
+                          background: 'var(--color-bg-secondary)',
+                          border: '0.5px solid var(--color-border)',
+                          borderRadius: 6, padding: '3px 8px',
+                        }}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
