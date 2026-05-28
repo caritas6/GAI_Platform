@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/GAI_Platform",
-  trailingSlash: true,   // GitHub Pages 정적 파일 라우팅 호환
+  // Vercel 배포: output: "export" 제거 → API Route 사용 가능
+  // basePath 제거 → 루트 도메인에서 서비스
   images: {
     unoptimized: true,
   },
