@@ -50,7 +50,7 @@ const projects: Project[] = [
     ],
     cases: [
       {
-        caseNum: 'case 01',
+        caseNum: 'PROJECT 01',
         title: '다학제적 융합 프로젝트',
         subtitle: '앨범 자켓 콜라보레이션',
         items: [
@@ -60,7 +60,7 @@ const projects: Project[] = [
         ],
       },
       {
-        caseNum: 'case 02',
+        caseNum: 'PROJECT 02',
         title: '지역 기업&대학 연계 브랜딩 사업',
         subtitle: '주)크로바_MainBrand · 위드쿡_SubBrand',
         items: [
@@ -70,7 +70,7 @@ const projects: Project[] = [
         ],
       },
       {
-        caseNum: 'case 03',
+        caseNum: 'PROJECT 03',
         title: '디자인재능나눔사업',
         subtitle: '브랜딩',
         items: [
@@ -80,7 +80,7 @@ const projects: Project[] = [
         ],
       },
       {
-        caseNum: 'case 04',
+        caseNum: 'PROJECT 04',
         title: '대학·지역사회 연계 미디어리터러시 프로그램',
         subtitle: '다문화 초기청소년 진로 연계 미디어 리터러시 역량강화 프로그램',
         items: [
