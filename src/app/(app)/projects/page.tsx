@@ -7,6 +7,13 @@ import Button from '@/components/Button';
 
 type ProjectStatus = '모집중' | '진행중' | '완료';
 
+interface CaseDetail {
+  caseNum: string;
+  title: string;
+  subtitle: string;
+  items: string[];
+}
+
 interface Project {
   id: number;
   title: string;
@@ -18,6 +25,7 @@ interface Project {
   tags: { label: string; variant: 'green' | 'purple' | 'orange' | 'amber' | 'gray' }[];
   description?: string;
   items?: string[];
+  cases?: CaseDetail[];
 }
 
 const projects: Project[] = [
@@ -39,6 +47,49 @@ const projects: Project[] = [
     tags: [
       { label: '산학협력', variant: 'green' },
       { label: '지역사회', variant: 'amber' },
+    ],
+    cases: [
+      {
+        caseNum: 'case 01',
+        title: '다학제적 융합 프로젝트',
+        subtitle: '앨범 자켓 콜라보레이션',
+        items: [
+          '시각디자인학과 X 실용음악과',
+          '디자인&음악의 콜라보레이션',
+          '앨범 재킷 디자인 & 앨범 발매',
+        ],
+      },
+      {
+        caseNum: 'case 02',
+        title: '지역 기업&대학 연계 브랜딩 사업',
+        subtitle: '주)크로바_MainBrand · 위드쿡_SubBrand',
+        items: [
+          '지역 기업의 브랜딩 작업 + 캡스톤 디자인 수업 연계 진행',
+          'MOU + 취업 연계 + 온라인 서브 브랜드 개발로 확장',
+          '홈페이지 리뉴얼 작업',
+        ],
+      },
+      {
+        caseNum: 'case 03',
+        title: '디자인재능나눔사업',
+        subtitle: '브랜딩',
+        items: [
+          '중소기업 10개 참여 X 대학 X 경기도경제과학진흥원',
+          '브랜딩 / 상품 패키지 디자인 / 캐릭터 디자인',
+          '시제품 출시 + 지속적인 디자인 큐레이팅',
+        ],
+      },
+      {
+        caseNum: 'case 04',
+        title: '대학·지역사회 연계 미디어리터러시 프로그램',
+        subtitle: '다문화 초기청소년 진로 연계 미디어 리터러시 역량강화 프로그램',
+        items: [
+          '경북대학교 영상미디어콘텐츠과 X 한국언론진흥재단 X 남양주시 다문화가족지원센터',
+          '대상 : 다문화가정 아동 및 청소년(초등학교 5, 6학년 / 중학생) 20명',
+          'Week 1 _ 메타버스 크리에이터 (제페토 빌드 잇 / 생성형 AI / VR·AR 진로체험)',
+          'Week 2 _ 미디어 진로 체험 (유튜브 A to Z / 스마트미디어를 활용한 영상 제작)',
+        ],
+      },
     ],
   },
   {
@@ -131,12 +182,169 @@ const statusColor: Record<ProjectStatus, { bg: string; color: string }> = {
   완료: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' },
 };
 
+/* ── 상세 모달 ── */
+function DetailModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const [activeCase, setActiveCase] = useState(0);
+  const cases = project.cases ?? [];
+  const current = cases[activeCase];
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.45)',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        padding: '0',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 720,
+          background: 'var(--color-bg-primary)',
+          borderRadius: '16px 16px 0 0',
+          maxHeight: '88vh', overflowY: 'auto',
+          padding: '24px 20px 32px',
+        }}
+      >
+        {/* 핸들 바 */}
+        <div style={{
+          width: 36, height: 4, borderRadius: 2,
+          background: 'var(--color-border)',
+          margin: '0 auto 20px',
+        }} />
+
+        {/* 헤더 */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{
+            fontSize: 10, color: 'var(--color-text-tertiary)',
+            fontFamily: 'monospace', letterSpacing: 1, marginBottom: 4,
+          }}>
+            PROJECT DETAIL
+          </div>
+          <div style={{
+            fontSize: 15, fontWeight: 700,
+            color: 'var(--color-text-primary)', lineHeight: 1.4,
+          }}>
+            {project.title}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--color-text-secondary)', marginTop: 4 }}>
+            {project.company} · {project.field}
+          </div>
+        </div>
+
+        {/* 케이스 탭 */}
+        <div style={{
+          display: 'flex', gap: 6, marginBottom: 20,
+          overflowX: 'auto', paddingBottom: 2,
+        }}>
+          {cases.map((c, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveCase(i)}
+              style={{
+                flexShrink: 0,
+                padding: '6px 12px',
+                borderRadius: 8,
+                border: activeCase === i
+                  ? '1.5px solid var(--brand)'
+                  : '0.5px solid var(--color-border)',
+                background: activeCase === i ? 'var(--brand-light)' : 'var(--color-bg-secondary)',
+                color: activeCase === i ? 'var(--brand)' : 'var(--color-text-secondary)',
+                fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                transition: 'all .15s',
+              }}
+            >
+              {c.caseNum}
+            </button>
+          ))}
+        </div>
+
+        {/* 케이스 본문 */}
+        {current && (
+          <div style={{
+            background: 'var(--color-bg-secondary)',
+            border: '0.5px solid var(--color-border)',
+            borderRadius: 12, padding: '20px 18px',
+          }}>
+            {/* case 번호 */}
+            <div style={{
+              fontSize: 10, color: 'var(--color-text-tertiary)',
+              fontFamily: 'monospace', letterSpacing: 1, marginBottom: 4,
+            }}>
+              {current.caseNum}
+            </div>
+
+            {/* 제목 */}
+            <div style={{
+              fontSize: 16, fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              marginBottom: 14, lineHeight: 1.4,
+            }}>
+              {current.title}
+            </div>
+
+            {/* 부제목 (초록 세로선) */}
+            <div style={{
+              borderLeft: '3px solid #2D6A4F',
+              paddingLeft: 12,
+              marginBottom: 18,
+            }}>
+              <span style={{
+                fontSize: 13, fontWeight: 600,
+                color: 'var(--color-text-primary)', lineHeight: 1.5,
+              }}>
+                {current.subtitle}
+              </span>
+            </div>
+
+            {/* 세부 항목 */}
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+              {current.items.map((item, idx) => (
+                <li key={idx} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                  fontSize: 13, color: 'var(--color-text-secondary)',
+                  lineHeight: 1.6, marginBottom: 6,
+                }}>
+                  <span style={{
+                    width: 5, height: 5, borderRadius: '50%',
+                    background: 'var(--color-text-tertiary)',
+                    marginTop: 7, flexShrink: 0,
+                  }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* 닫기 */}
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: 16, width: '100%', padding: '10px',
+            border: '0.5px solid var(--color-border)',
+            borderRadius: 9, background: 'var(--color-bg-secondary)',
+            fontSize: 13, color: 'var(--color-text-secondary)',
+            cursor: 'pointer',
+          }}
+        >
+          닫기
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── 메인 페이지 ── */
 export default function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [fieldFilter, setFieldFilter] = useState('전체 분야');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [companyTypes, setCompanyTypes] = useState({ 대기업: true, 스타트업: true, 공공기관: false });
   const [duration, setDuration] = useState('1학기');
+  const [detailProject, setDetailProject] = useState<Project | null>(null);
 
   const filtered = projects.filter((p) => {
     const matchSearch = p.title.includes(search) || p.company.includes(search);
@@ -151,6 +359,14 @@ export default function ProjectsPage() {
 
   return (
     <div>
+      {/* 상세 모달 */}
+      {detailProject && (
+        <DetailModal
+          project={detailProject}
+          onClose={() => setDetailProject(null)}
+        />
+      )}
+
       {/* 검색 & 필터 바 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
         <input
@@ -176,59 +392,32 @@ export default function ProjectsPage() {
         </select>
       </div>
 
-      {/* 2단 레이아웃: 필터 사이드바 + 목록 */}
+      {/* 2단 레이아웃 */}
       <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 12 }}>
         {/* 사이드바 필터 */}
-        <div
-          style={{
-            borderRight: '0.5px solid var(--color-border)',
-            paddingRight: 12,
-          }}
-        >
+        <div style={{ borderRight: '0.5px solid var(--color-border)', paddingRight: 12 }}>
           <SectionLabel>필터</SectionLabel>
 
-          <p
-            style={{
-              fontSize: 11,
-              color: 'var(--color-text-secondary)',
-              margin: '8px 0 4px',
-              fontWeight: 500,
-            }}
-          >
+          <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '8px 0 4px', fontWeight: 500 }}>
             기업 규모
           </p>
           {(['대기업', '스타트업', '공공기관'] as const).map((t) => (
-            <label
-              key={t}
-              style={{ fontSize: 11, display: 'block', marginBottom: 4, cursor: 'pointer' }}
-            >
+            <label key={t} style={{ fontSize: 11, display: 'block', marginBottom: 4, cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={companyTypes[t]}
-                onChange={(e) =>
-                  setCompanyTypes((prev) => ({ ...prev, [t]: e.target.checked }))
-                }
+                onChange={(e) => setCompanyTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
                 style={{ marginRight: 6 }}
               />
               {t}
             </label>
           ))}
 
-          <p
-            style={{
-              fontSize: 11,
-              color: 'var(--color-text-secondary)',
-              margin: '10px 0 4px',
-              fontWeight: 500,
-            }}
-          >
+          <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '10px 0 4px', fontWeight: 500 }}>
             기간
           </p>
           {['1학기', '1년'].map((d) => (
-            <label
-              key={d}
-              style={{ fontSize: 11, display: 'block', marginBottom: 4, cursor: 'pointer' }}
-            >
+            <label key={d} style={{ fontSize: 11, display: 'block', marginBottom: 4, cursor: 'pointer' }}>
               <input
                 type="radio"
                 name="duration"
@@ -252,66 +441,37 @@ export default function ProjectsPage() {
 
           {filtered.map((p) => (
             <Card key={p.id} style={{ marginBottom: 8 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  <p
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--color-text-primary)',
-                      margin: '0 0 4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                  >
+                  <p style={{
+                    fontSize: 12, fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 4px',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
                     {p.title}
-                    <span
-                      style={{
-                        fontSize: 10,
-                        padding: '2px 7px',
-                        borderRadius: 4,
-                        ...statusColor[p.status],
-                      }}
-                    >
+                    <span style={{
+                      fontSize: 10, padding: '2px 7px',
+                      borderRadius: 4, ...statusColor[p.status],
+                    }}>
                       {p.status}
                     </span>
                   </p>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      color: 'var(--color-text-secondary)',
-                      margin: '0 0 6px',
-                    }}
-                  >
+                  <p style={{ fontSize: 10, color: 'var(--color-text-secondary)', margin: '0 0 6px' }}>
                     {p.company} · {p.field} · {p.teamSize} · {p.duration}
                   </p>
                   {p.description && (
-                    <p style={{
-                      fontSize: 11, color: 'var(--color-text-secondary)',
-                      margin: '0 0 6px', lineHeight: 1.5,
-                    }}>
+                    <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '0 0 6px', lineHeight: 1.5 }}>
                       {p.description}
                     </p>
                   )}
                   {p.items && p.items.length > 0 && (
                     <ul style={{
-                      margin: '0 0 8px', padding: 0,
-                      listStyle: 'none',
-                      borderLeft: '2px solid var(--brand)',
-                      paddingLeft: 10,
+                      margin: '0 0 8px', padding: 0, listStyle: 'none',
+                      borderLeft: '2px solid var(--brand)', paddingLeft: 10,
                     }}>
                       {p.items.map((item) => (
-                        <li key={item} style={{
-                          fontSize: 10, color: 'var(--color-text-secondary)',
-                          lineHeight: 1.6,
-                        }}>
+                        <li key={item} style={{ fontSize: 10, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
                           {item}
                         </li>
                       ))}
@@ -319,15 +479,15 @@ export default function ProjectsPage() {
                   )}
                   <div>
                     {p.tags.map((tag) => (
-                      <Tag key={tag.label} variant={tag.variant}>
-                        {tag.label}
-                      </Tag>
+                      <Tag key={tag.label} variant={tag.variant}>{tag.label}</Tag>
                     ))}
                   </div>
                 </div>
+
                 <Button
                   variant={p.status === '모집중' ? 'primary' : 'default'}
                   style={{ marginLeft: 12, flexShrink: 0 }}
+                  onClick={p.cases ? () => setDetailProject(p) : undefined}
                 >
                   {p.status === '모집중' ? '지원하기' : '상세보기'}
                 </Button>
@@ -336,19 +496,19 @@ export default function ProjectsPage() {
           ))}
 
           {filtered.length === 0 && (
-            <p
-              style={{
-                fontSize: 12,
-                color: 'var(--color-text-tertiary)',
-                textAlign: 'center',
-                padding: '32px 0',
-              }}
-            >
+            <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '32px 0' }}>
               검색 결과가 없습니다.
             </p>
           )}
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
