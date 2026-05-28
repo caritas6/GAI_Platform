@@ -16,11 +16,50 @@ interface Project {
   duration: string;
   status: ProjectStatus;
   tags: { label: string; variant: 'green' | 'purple' | 'orange' | 'amber' | 'gray' }[];
+  description?: string;
+  items?: string[];
 }
 
 const projects: Project[] = [
   {
     id: 1,
+    title: '대학·지역사회 연계 디자인 프로젝트 사업',
+    company: 'KBU · 경기도경제과학진흥원',
+    field: '서비스디자인',
+    teamSize: '다수',
+    duration: '상시',
+    status: '진행중',
+    description: '다학제적 융합으로 진행된 대학 교육과 기업, 지자체와의 협업 프로젝트 사업.',
+    items: [
+      '다학제적 융합 프로젝트',
+      '지역 기업&대학 연계 브랜딩 사업',
+      '디자인재능나눔사업',
+      '대학·지역사회 연계 미디어리터러시 프로그램',
+    ],
+    tags: [
+      { label: '산학협력', variant: 'green' },
+      { label: '지역사회', variant: 'amber' },
+    ],
+  },
+  {
+    id: 2,
+    title: '학교기업: 대학·지역사회 연계 콘텐츠 플랫폼 사업',
+    company: '경북대학교',
+    field: '콘텐츠',
+    teamSize: '학과 단위',
+    duration: '상시',
+    status: '진행중',
+    description: '학생들의 현장실습 및 인턴쉽 교육으로 전공/진로 탐색의 기회 제공',
+    items: [
+      '경북대학교 영상미디어콘텐츠학과 기업 — 미디어콘텐츠 제작센터',
+    ],
+    tags: [
+      { label: '현장실습', variant: 'green' },
+      { label: '인턴쉽', variant: 'purple' },
+    ],
+  },
+  {
+    id: 3,
     title: '스마트홈 UX 리디자인',
     company: '삼성전자',
     field: 'UX/UI',
@@ -33,7 +72,7 @@ const projects: Project[] = [
     ],
   },
   {
-    id: 2,
+    id: 4,
     title: 'AR 내비게이션 콘셉트',
     company: '현대자동차',
     field: '실감콘텐츠',
@@ -46,7 +85,7 @@ const projects: Project[] = [
     ],
   },
   {
-    id: 3,
+    id: 5,
     title: '공공 키오스크 접근성 개선',
     company: '서울시',
     field: '서비스디자인',
@@ -59,7 +98,7 @@ const projects: Project[] = [
     ],
   },
   {
-    id: 4,
+    id: 6,
     title: '지속가능 패키지 브랜딩',
     company: '풀무원',
     field: 'UX/UI',
@@ -72,7 +111,7 @@ const projects: Project[] = [
     ],
   },
   {
-    id: 5,
+    id: 7,
     title: 'XR 문화유산 체험 시스템',
     company: '문화재청',
     field: '실감콘텐츠',
@@ -127,6 +166,7 @@ export default function ProjectsPage() {
           <option>영상</option>
           <option>실감콘텐츠</option>
           <option>서비스디자인</option>
+          <option>콘텐츠</option>
         </select>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option>모집 중</option>
@@ -250,8 +290,33 @@ export default function ProjectsPage() {
                       margin: '0 0 6px',
                     }}
                   >
-                    {p.company} · {p.field} · 팀 {p.teamSize} · {p.duration}
+                    {p.company} · {p.field} · {p.teamSize} · {p.duration}
                   </p>
+                  {p.description && (
+                    <p style={{
+                      fontSize: 11, color: 'var(--color-text-secondary)',
+                      margin: '0 0 6px', lineHeight: 1.5,
+                    }}>
+                      {p.description}
+                    </p>
+                  )}
+                  {p.items && p.items.length > 0 && (
+                    <ul style={{
+                      margin: '0 0 8px', padding: 0,
+                      listStyle: 'none',
+                      borderLeft: '2px solid var(--brand)',
+                      paddingLeft: 10,
+                    }}>
+                      {p.items.map((item) => (
+                        <li key={item} style={{
+                          fontSize: 10, color: 'var(--color-text-secondary)',
+                          lineHeight: 1.6,
+                        }}>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <div>
                     {p.tags.map((tag) => (
                       <Tag key={tag.label} variant={tag.variant}>
