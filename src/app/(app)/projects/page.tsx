@@ -134,7 +134,7 @@ const statusColor: Record<ProjectStatus, { bg: string; color: string }> = {
 export default function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [fieldFilter, setFieldFilter] = useState('전체 분야');
-  const [statusFilter, setStatusFilter] = useState('모집 중');
+  const [statusFilter, setStatusFilter] = useState('전체');
   const [companyTypes, setCompanyTypes] = useState({ 대기업: true, 스타트업: true, 공공기관: false });
   const [duration, setDuration] = useState('1학기');
 
