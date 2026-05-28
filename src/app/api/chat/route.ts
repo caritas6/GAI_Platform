@@ -1,9 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   '리서치 Agent': `당신은 KBU(경기북부대학교) 디자인학과 산학협력 플랫폼 G·A·I의 리서치 Agent입니다.
@@ -61,7 +59,7 @@ export async function POST(request: Request) {
   try {
     const { messages, agentType, projectName } = await request.json();
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
         { error: 'API 키가 설정되지 않았습니다.' },
         { status: 500 },
@@ -72,18 +70,26 @@ export async function POST(request: Request) {
       (SYSTEM_PROMPTS[agentType] ?? SYSTEM_PROMPTS['멘토링 Agent']) +
       `\n\n현재 프로젝트: ${projectName ?? '미지정'}`;
 
-    const response = await client.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: messages.map((m: { role: string; text: string }) => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.text,
-      })),
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: systemPrompt,
     });
 
-    const text =
-      response.content[0].type === 'text' ? response.content[0].text : '';
+    // 마지막 메시지를 제외한 대화 기록
+    const history = messages.slice(0, -1).map((m: { role: string; text: string }) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.text }],
+    }));
+
+    const lastMessage = messages[messages.length - 1];
+
+    const chat = model.startChat({
+      history,
+      generationConfig: { maxOutputTokens: 1024 },
+    });
+
+    const result = await chat.sendMessage(lastMessage.text);
+    const text = result.response.text();
 
     return NextResponse.json({ text });
   } catch (error: unknown) {
